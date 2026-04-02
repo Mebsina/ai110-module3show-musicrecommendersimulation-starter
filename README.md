@@ -66,6 +66,9 @@ flowchart TD
     N --> O([Top K recommendations\nwith scores and explanations])
 ```
 
+### Example output
+![Example output](example.png)
+
 ### Potential Biases
 
 - The system may over-prioritize genre and miss songs from other genres that otherwise fit the user well. A jazz song with matching mood and energy will always rank below a lofi song with mismatched mood, simply because of the genre bonus.
