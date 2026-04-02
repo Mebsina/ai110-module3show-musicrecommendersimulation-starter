@@ -23,6 +23,52 @@ Real-world recommenders like Spotify combine content-based filtering with collab
 
 **`UserProfile` fields used:** `favorite_genre`, `favorite_mood`, `target_energy`, `likes_acoustic`
 
+### Algorithm Recipe
+
+Each song in the catalog is scored against the user profile using these rules:
+
+- `+2.0` if the song's genre matches the user's favorite genre
+- `+1.5` if the song's mood matches the user's favorite mood
+- `-abs(song.energy - target_energy)` penalty for energy distance (max 1.0)
+- `+acousticness * 0.5` if the user likes acoustic, or `+(1 - acousticness) * 0.5` if not
+
+Songs are then ranked by score and the top K are returned.
+
+Genre is weighted highest because it is the broadest filter. Mood is second because it captures the emotional intent within a genre. Energy and acousticness add numeric precision as tiebreakers.
+
+### Features Not Used and Why
+
+- `tempo_bpm`: moves almost in lockstep with energy across the catalog. Including it would double-count the same signal energy already captures.
+- `danceability`: closely correlated with both energy and genre. Pop and EDM songs score high, lofi and classical score low, which energy already reflects.
+- `valence`: useful as a soft mood proxy but redundant when the mood field already captures emotional tone directly. Could be added as a tiebreaker in a future version.
+- `artist`: content-based filtering should reflect what a song sounds like, not who made it. Artist preference belongs in collaborative filtering.
+
+### Data Flow
+
+```mermaid
+flowchart TD
+    A([User Profile\ngenre, mood, energy, likes_acoustic]) --> C
+    B([songs.csv]) --> C[load_songs]
+    C --> D[For each song in catalog]
+    D --> E{genre match?}
+    E -- yes +2.0 --> H{mood match?}
+    E -- no +0.0 --> H
+    H -- yes +1.5 --> K{energy distance}
+    H -- no +0.0 --> K
+    K["energy distance"] -- "0.0 to -1.0" --> L{likes acoustic?}
+    L -- "yes, 0.0 to +0.5" --> M[song score]
+    L -- "no, 0.0 to +0.5" --> M
+    M --> D
+    D -- all songs scored --> N[sort by score descending]
+    N --> O([Top K recommendations\nwith scores and explanations])
+```
+
+### Potential Biases
+
+- The system may over-prioritize genre and miss songs from other genres that otherwise fit the user well. A jazz song with matching mood and energy will always rank below a lofi song with mismatched mood, simply because of the genre bonus.
+- The catalog is small and unbalanced. Lofi has three songs, while metal, blues, and reggae have one each. A user with a rare genre preference will have fewer candidates to rank.
+- The acousticness bonus is always on, which means every score is partly shaped by a preference the user may not feel strongly about.
+
 ---
 
 ## Getting Started
