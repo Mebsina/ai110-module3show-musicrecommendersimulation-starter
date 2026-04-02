@@ -34,7 +34,10 @@ Each song in the catalog is scored against the user profile using these rules:
 
 Songs are then ranked by score and the top K are returned.
 
-Genre is weighted highest because it is the broadest filter. Mood is second because it captures the emotional intent within a genre. Energy and acousticness add numeric precision as tiebreakers.
+- Genre is weighted highest because it is the broadest filter. 
+- Mood is second because it captures the emotional intent within a genre. 
+- Energy and acousticness add numeric precision as tiebreakers.
+  - For example, if `likes_acoustic = True` and a song has `acousticness = 0.86`, the bonus is `0.86 * 0.5 = +0.43`. If `likes_acoustic = False`, the same song scores `(1 - 0.86) * 0.5 = +0.07` instead, rewarding more produced sounds.
 
 ### Features Not Used and Why
 
