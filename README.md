@@ -17,17 +17,11 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world recommenders like Spotify combine content-based filtering with collaborative filtering. Content-based filtering matches song attributes to your stated preferences. Collaborative filtering finds patterns across millions of users who listened to similar things. My simulation focuses on the content-based side. It scores each song by comparing its attributes against a user profile and surfaces the top matches. Genre and mood are the highest priority because those are how listeners describe what they want. Energy level adds numeric precision, and acousticness captures a secondary texture difference between organic and produced sounds.
 
-Some prompts to answer:
+**`Song` features used:** `genre`, `mood`, `energy`, `acousticness`, `valence`
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
-
-You can include a simple diagram or bullet list if helpful.
+**`UserProfile` fields used:** `favorite_genre`, `favorite_mood`, `target_energy`, `likes_acoustic`
 
 ---
 
