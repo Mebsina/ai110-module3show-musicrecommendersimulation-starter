@@ -9,6 +9,7 @@ You will implement the functions in recommender.py:
 - recommend_songs
 """
 
+from tabulate import tabulate
 from src.recommender import load_songs, recommend_songs
 
 
@@ -50,10 +51,11 @@ def main() -> None:
     for profile in PROFILES:
         print(f"\n=== {profile['name']} ===\n")
         recommendations = recommend_songs(profile, songs, k=5)
-        for song, score, explanation in recommendations:
-            print(f"{song['title']} - Score: {score:.2f}")
-            print(f"Because: {explanation}")
-            print()
+        rows = []
+        for i, (song, score, explanation) in enumerate(recommendations):
+            rows.append([i + 1, song["title"], song["artist"], f"{score:.2f}", explanation])
+        print(tabulate(rows, headers=["#", "Title", "Artist", "Score", "Reasons"], tablefmt="rounded_outline"))
+        print()
 
 
 if __name__ == "__main__":
