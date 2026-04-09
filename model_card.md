@@ -175,3 +175,17 @@ Prompts:
 
 - What would you try next if you extended this project?
 	- Add more songs per genre so underrepresented genres like folk and hip-hop produce a meaningful top 5 instead of one strong match followed by near-zero scores. Also add a diversity rule so the same genre cannot fill all five spots.
+
+---
+
+## 11. Optional Extensions
+
+- Challenge 2: Multiple Scoring Modes
+	- Added three ranking strategies selectable via a `--mode` CLI flag: 
+		- `genre` weights genre match highest
+		- `mood` weights mood match highest
+		- `energy` applies a heavier penalty for energy distance. 
+	- Each mode uses the same scoring components but different weights defined in a `MODES` dict. Switching modes visibly changes the ranking order, most notably in profiles where genre and mood point to different songs.
+
+- Challenge 4: Visual Summary Table
+	- Results are displayed using `tabulate` with `rounded_outline` formatting. Each profile produces a bordered table showing rank, title, artist, score, and the full reason breakdown per song. This makes the scoring transparent and easy to read at a glance.

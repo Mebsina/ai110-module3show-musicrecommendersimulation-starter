@@ -46,6 +46,28 @@ class Recommender:
         # TODO: Implement explanation logic
         return "Explanation placeholder"
 
+MODES = {
+    "genre": {
+        "genre":        3.0,
+        "mood":         1.0,
+        "energy":       0.5,
+        "acousticness": 0.25,
+    },
+    "mood": {
+        "genre":        1.0,
+        "mood":         3.0,
+        "energy":       0.5,
+        "acousticness": 0.25,
+    },
+    "energy": {
+        "genre":        1.0,
+        "mood":         1.0,
+        "energy":       2.0,
+        "acousticness": 0.25,
+    },
+}
+
+
 def load_songs(csv_path: str) -> List[Dict]:
     """
     Loads songs from a CSV file.
@@ -71,43 +93,44 @@ def load_songs(csv_path: str) -> List[Dict]:
     print(f"Loaded: {len(songs)} songs")
     return songs
 
-def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
+def score_song(user_prefs: Dict, song: Dict, weights: Dict) -> Tuple[float, List[str]]:
     """Score a single song against user preferences and return a numeric score with reasons."""
     score = 0.0
     reasons = []
 
     if song["genre"] == user_prefs["genre"]:
-        score += 2.0
-        reasons.append("genre match (+2.0)")
+        score += weights["genre"]
+        reasons.append(f"genre match (+{weights['genre']})")
 
     if song["mood"] == user_prefs["mood"]:
-        score += 1.5
-        reasons.append("mood match (+1.5)")
+        score += weights["mood"]
+        reasons.append(f"mood match (+{weights['mood']})")
 
-    energy_penalty = abs(song["energy"] - user_prefs["energy"])
+    energy_penalty = abs(song["energy"] - user_prefs["energy"]) * weights["energy"]
     score -= energy_penalty
     reasons.append(f"energy distance (-{energy_penalty:.2f})")
 
     if user_prefs.get("likes_acoustic"):
-        acoustic_bonus = song["acousticness"] * 0.5
+        acoustic_bonus = song["acousticness"] * weights["acousticness"]
         score += acoustic_bonus
         reasons.append(f"acoustic bonus (+{acoustic_bonus:.2f})")
     else:
-        acoustic_bonus = (1 - song["acousticness"]) * 0.5
+        acoustic_bonus = (1 - song["acousticness"]) * weights["acousticness"]
         score += acoustic_bonus
         reasons.append(f"non-acoustic bonus (+{acoustic_bonus:.2f})")
 
     return score, reasons
 
 
-def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
+def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5, mode: str = "genre-first") -> List[Tuple[Dict, float, str]]:
     """
     Functional implementation of the recommendation logic.
     Required by src/main.py
     """
+    weights = MODES[mode]
     scored = []
     for song in songs:
-        score, reasons = score_song(user_prefs, song)
+        score, reasons = score_song(user_prefs, song, weights)
         scored.append((song, score, ", ".join(reasons)))
     scored.sort(key=lambda x: x[1], reverse=True)
     return scored[:k]

@@ -16,19 +16,18 @@ Real-world recommenders like Spotify combine content-based filtering with collab
 
 ### Algorithm Recipe
 
-Each song in the catalog is scored against the user profile using these rules:
+Each song is scored using the same four components — genre match, mood match, energy distance, and acousticness bonus — but the weights differ by mode:
 
-- `+2.0` if the song's genre matches the user's favorite genre
-- `+1.5` if the song's mood matches the user's favorite mood
-- `-abs(song.energy - target_energy)` penalty for energy distance (max 1.0)
-- `+acousticness * 0.5` if the user likes acoustic, or `+(1 - acousticness) * 0.5` if not
+| Component | `genre` mode | `mood` mode | `energy` mode |
+|---|---|---|---|
+| Genre match | +3.0 | +1.0 | +1.0 |
+| Mood match | +1.0 | +3.0 | +1.0 |
+| Energy penalty | ×0.5 | ×0.5 | ×2.0 |
+| Acousticness bonus | ×0.25 | ×0.25 | ×0.25 |
 
-Songs are then ranked by score and the top K are returned.
+Switch modes with `--mode genre`, `--mode mood`, or `--mode energy`. Default is `genre`.
 
-- Genre is weighted highest because it is the broadest filter. 
-- Mood is second because it captures the emotional intent within a genre. 
-- Energy and acousticness add numeric precision as tiebreakers.
-  - For example, if `likes_acoustic = True` and a song has `acousticness = 0.86`, the bonus is `0.86 * 0.5 = +0.43`. If `likes_acoustic = False`, the same song scores `(1 - 0.86) * 0.5 = +0.07` instead, rewarding more produced sounds.
+For example, if `likes_acoustic = True` and a song has `acousticness = 0.86`, the bonus is `0.86 * 0.25 = +0.21`. If `likes_acoustic = False`, the same song scores `(1 - 0.86) * 0.25 = +0.04` instead.
 
 ### Features Not Used and Why
 
@@ -59,17 +58,14 @@ flowchart TD
 
 ### Example Output
 
-**Chill Lofi Listener**
-![Chill Lofi output](assets/chill-lofi.png)
+**Genre Mode**
+![Genre mode output](assets/genre.png)
 
-**High-Energy EDM Listener**
-![High-Energy EDM output](assets/high-energy-edm.png)
+**Mood Mode**
+![Mood mode output](assets/mood.png)
 
-**Hip-Hop Fan**
-![Hip-Hop output](assets/hip-hop.png)
-
-**Acoustic Folk Listener**
-![Acoustic Folk output](assets/acoustic.png)
+**Energy Mode**
+![Energy mode output](assets/energy.png)
 
 ---
 
@@ -94,7 +90,10 @@ pip install -r requirements.txt
 3. Run the app:
 
 ```bash
-python -m src.main
+python -m src.main                  # defaults to genre mode
+python -m src.main --mode genre
+python -m src.main --mode mood
+python -m src.main --mode energy
 ```
 
 ### Running Tests
@@ -114,6 +113,8 @@ You can add more tests in `tests/test_recommender.py`.
 - Ran four distinct user profiles and compared the ranked outputs. The Chill Lofi and High-Energy EDM profiles produced meaningful top-5 lists because the catalog has multiple songs in those genres. The Hip-Hop and Acoustic Folk profiles exposed a catalog imbalance: each has only one matching genre song, so rank 1 scored around 3.9 while rank 2 dropped to around 0.4.
 - Observed that the EDM and Hip-Hop profiles shared energetic as their mood, which caused their second-place picks to swap: the EDM profile surfaced Block Party second, and the Hip-Hop profile surfaced Drop Zone second, purely from the +1.5 mood bonus.
 - Confirmed that Coffee Shop Stories (jazz, relaxed) appeared in the Chill Lofi top 5 despite no genre or mood match, because its energy and acousticness were close enough to earn a non-zero score.
+- Switched to `--mode mood` for the Chill Lofi profile and observed Spacewalk Thoughts jump from rank 4 to rank 3, overtaking Focus Flow. Spacewalk matches the chill mood but not the lofi genre, while Focus Flow matches lofi but not chill. In mood mode the mood bonus (3.0) outweighs the genre bonus (1.0), flipping their order.
+- Switched to `--mode energy` and observed the ranking become almost entirely driven by how close a song's energy is to the user's target, with genre and mood mattering far less.
 
 ---
 

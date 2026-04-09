@@ -9,9 +9,9 @@ You will implement the functions in recommender.py:
 - recommend_songs
 """
 
+import argparse
 from tabulate import tabulate
-from src.recommender import load_songs, recommend_songs
-
+from src.recommender import load_songs, recommend_songs, MODES
 
 PROFILES = [
     {
@@ -46,11 +46,15 @@ PROFILES = [
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--mode", choices=list(MODES.keys()), default="genre")
+    args = parser.parse_args()
+
     songs = load_songs("data/songs.csv")
 
     for profile in PROFILES:
-        print(f"\n=== {profile['name']} ===\n")
-        recommendations = recommend_songs(profile, songs, k=5)
+        print(f"\n=== {profile['name']} | mode: {args.mode} ===\n")
+        recommendations = recommend_songs(profile, songs, k=5, mode=args.mode)
         rows = []
         for i, (song, score, explanation) in enumerate(recommendations):
             rows.append([i + 1, song["title"], song["artist"], f"{score:.2f}", explanation])
