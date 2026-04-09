@@ -44,9 +44,9 @@ flowchart TD
     B([songs.csv]) --> C[load_songs]
     C --> D[For each song in catalog]
     D --> E{genre match?}
-    E -- yes +2.0 --> H{mood match?}
+    E -- yes, weighted by mode --> H{mood match?}
     E -- no +0.0 --> H
-    H -- yes +1.5 --> K{energy distance}
+    H -- yes, weighted by mode --> K{energy distance}
     H -- no +0.0 --> K
     K["energy distance"] -- "0.0 to -1.0" --> L{likes acoustic?}
     L -- "yes, 0.0 to +0.5" --> M[song score]
@@ -111,7 +111,7 @@ You can add more tests in `tests/test_recommender.py`.
 ## Experiments You Tried
 
 - Ran four distinct user profiles and compared the ranked outputs. The Chill Lofi and High-Energy EDM profiles produced meaningful top-5 lists because the catalog has multiple songs in those genres. The Hip-Hop and Acoustic Folk profiles exposed a catalog imbalance: each has only one matching genre song, so rank 1 scored around 3.9 while rank 2 dropped to around 0.4.
-- Observed that the EDM and Hip-Hop profiles shared energetic as their mood, which caused their second-place picks to swap: the EDM profile surfaced Block Party second, and the Hip-Hop profile surfaced Drop Zone second, purely from the +1.5 mood bonus.
+- Observed that the EDM and Hip-Hop profiles shared energetic as their mood, which caused their second-place picks to swap: the EDM profile surfaced Block Party second, and the Hip-Hop profile surfaced Drop Zone second, purely from the mood bonus.
 - Confirmed that Coffee Shop Stories (jazz, relaxed) appeared in the Chill Lofi top 5 despite no genre or mood match, because its energy and acousticness were close enough to earn a non-zero score.
 - Switched to `--mode mood` for the Chill Lofi profile and observed Spacewalk Thoughts jump from rank 4 to rank 3, overtaking Focus Flow. Spacewalk matches the chill mood but not the lofi genre, while Focus Flow matches lofi but not chill. In mood mode the mood bonus (3.0) outweighs the genre bonus (1.0), flipping their order.
 - Switched to `--mode energy` and observed the ranking become almost entirely driven by how close a song's energy is to the user's target, with genre and mood mattering far less.

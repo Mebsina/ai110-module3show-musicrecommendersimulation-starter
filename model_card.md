@@ -39,7 +39,7 @@ Prompts:
 	- Favorite genre, favorite mood, target energy, and `likes_acoustic`.
 
 - How does the model turn those into a score  
-	- Each song gets points for matching the user's genre (+2.0) and mood (+1.5). Then it loses points based on how far its energy is from the user's target. Finally it gains a small bonus based on how acoustic or produced it sounds relative to the user's preference.
+	- Each song gets points for matching the user's genre and mood, with weights that vary by ranking mode. Then it loses points based on how far its energy is from the user's target. Finally it gains a small bonus based on how acoustic or produced it sounds relative to the user's preference.
 
 - What changes did you make from the starter logic  
 	- The starter had empty stubs. I added `score_song` as a separate function that returns both a numeric score and a list of reasons, then wired it into `recommend_songs` for ranking.
@@ -121,7 +121,7 @@ Prompts:
 	- Coffee Shop Stories (jazz, relaxed) appeared in the Chill Lofi top 5 despite matching neither genre nor mood, purely because its energy and acousticness were close to the profile.
 
 - Any simple tests or comparisons you ran  
-	- Ran all four profiles and compared outputs. The EDM profile preferred Drop Zone with a near-perfect energy match (distance 0.00). The Hip-Hop profile preferred Block Party for the same reason. Both had the other as their second pick because the shared mood (energetic) was enough for a +1.5 boost even without a genre match.
+	- Ran all four profiles across all three modes. The EDM profile preferred Drop Zone with a near-perfect energy match. The Hip-Hop profile preferred Block Party for the same reason. Both had the other as their second pick because the shared energetic mood was enough for a mood bonus even without a genre match.
 
 ---
 
